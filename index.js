@@ -8,7 +8,7 @@ let client = [], dialogs = [], prevMsgs = [], msgs = [];
 let prevResult = '', result = '', blocked = false;
 
 
-id = process.env.ID;
+id = parseInt(process.env.ID);
 hash = process.env.HASH;
 session = new StringSession(process.env.SESSION);
 OnInit();
