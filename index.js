@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 let channelName = 'Telegram', id = 0, hash = '', session = [];
-let client = [], dialogs = [], prevMsgs = [], msgs = [];
+let dialogs = [], prevMsgs = [], msgs = [];
 let prevResult = '', result = '', blocked = false;
 
 id = parseInt(process.env.ID);
