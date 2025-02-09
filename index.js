@@ -12,7 +12,7 @@ let prevResult = '', result = '', blocked = false;
 
 id = parseInt(process.env.ID);
 hash = process.env.HASH;
-session = new StringSession(process.env.SESSION);
+session = process.env.SESSION;
 
 
 const client = new TelegramClient(new StringSession(session), id, hash, {
