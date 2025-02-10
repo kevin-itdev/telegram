@@ -2,36 +2,34 @@ const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { NewMessage } = require("telegram/events");
 const express = require('express');
-const input = require('input');
 const app = express();
 app.use(express.json());
 
 let channelName = 'Telegram', id = 0, hash = '', session = [], botToken = '';
-let dialogs = [], prevMsgs = [], msgs = [];
-let prevResult = '', result = '', blocked = false;
+let prevMsgs = [];
+let prevResult = '', result = '';
 
 id = parseInt(process.env.ID);
 hash = process.env.HASH;
 session = process.env.SESSION;
 botToken = process.env.BOT_TOKEN;
+const client = new TelegramClient(new StringSession(session), id, hash, { connectionRetries: 5 });
 
 
-const client = new TelegramClient(new StringSession(session), id, hash, {
-  connectionRetries: 5,
-});
 
 app.get("/", async (req, res) => {
   res.json({ message: "Telegram bot is running!" });
 });
 
 app.get("/sendMessage", async (req, res) => {
+  
   try {
     await client.connect();
-    dialogs = await client.getDialogs({archived:false});
+    const dialogs = await client.getDialogs({archived:false});
     if (dialogs[0].title == channelName){
         
         let k = 0;
-        msgs = await client.getMessages(dialogs[0], { limit: 50 });
+        const msgs = await client.getMessages(dialogs[0], { limit: 50 });
   
         for (let i = 0; i <= k; i++) {        
           if (msgs[i].className == 'Message' && prevResult == msgs[i].message) {       
@@ -56,9 +54,8 @@ app.get("/sendMessage", async (req, res) => {
     res.json({ success: true, message: "Message sent!" });
   
   
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  } 
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 export default app;
