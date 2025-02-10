@@ -17,15 +17,15 @@ const client = new TelegramClient(new StringSession(session), id, hash, { connec
 
 
 
-app.get("/", async (req, res) => {
-  res.json({ message: "Telegram bot is running!" });
-});
-
+app.get("/", async (req, res) => { res.json({ message: "Telegram bot is running!" }); });
 app.get("/sendMessage", async (req, res) => {
   
   try {
     await client.connect();
+    await client.sendMessage("me", { message: "Vercel received a message!" });
     const dialogs = await client.getDialogs({archived:false});
+    console.log(new Date().toLocaleString(),` ---- ${dialogs[0].title}`);
+    
     if (dialogs[0].title == channelName){
         
         let k = 0;
