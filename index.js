@@ -1,61 +1,50 @@
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { NewMessage } = require("telegram/events");
-const express = require('express');
 const app = express();
 app.use(express.json());
 
-let channelName = 'Telegram', id = 0, hash = '', session = [], botToken = '';
-let prevMsgs = [];
-let prevResult = '', result = '';
-
-id = parseInt(process.env.ID);
-hash = process.env.HASH;
-session = process.env.SESSION;
-botToken = process.env.BOT_TOKEN;
-const client = new TelegramClient(new StringSession(session), id, hash, { connectionRetries: 5 });
+const botToken = process.env.BOT_TOKEN; 
+const targetGroupId = parseInt(process.env.GROUP_ID);
 
 
 
-app.get("/", async (req, res) => { res.json({ message: "Telegram bot is running!" }); });
-app.get("/sendMessage", async (req, res) => {
-  
+app.post("/webhook", async (req, res) => {
   try {
-    await client.connect();
-    await client.sendMessage("me", { message: "Vercel received a message!" });
-    const dialogs = await client.getDialogs({archived:false});
-    console.log(new Date().toLocaleString(),` ---- ${dialogs[0].title}`);
-    
-    if (dialogs[0].title == channelName){
-        
-        let k = 0;
-        const msgs = await client.getMessages(dialogs[0], { limit: 50 });
-  
-        for (let i = 0; i <= k; i++) {        
-          if (msgs[i].className == 'Message' && prevResult == msgs[i].message) {       
-  
-            prevResult = msgs[0].message;
-            break;
-          }
-          k++;//New messages received
-        }
-        if (k == 0) { return; }
+    const update = req.body;
+    console.log("Webhook received:", update);
 
-        for (let i = 0; i <= k - 1; i++) {
-          if (msgs[i].className != 'Message')
-            continue;
-    
-          result = `{${msgs[i].message}}`;
-          console.log(new Date().toLocaleString(),` ---- ${dialogs[0].title}:\n`,result,"\n");
+    if (update.message) {
+      const chatId = update.message.chat.id;
+      const text = update.message.text;
+
+      console.log(`Message from ${chatId}: ${text}`);
+
+      if (chatId === targetGroupId) {
+        await sendMessage(chatId, "Hello! I received your message.");
       }
     }
 
-    await client.sendMessage("me", { message: "Hello from Vercel!" });
-    res.json({ success: true, message: "Message sent!" });
-  
-  
-  } 
-  catch (error) { res.status(500).json({ error: error.message }); }
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    res.sendStatus(500);
+  }
 });
+
+
+
+async function sendMessage(chatId, text) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text: text }),
+  });
+
+  const result = await response.json();
+  console.log("Message sent:", result);
+}
 
 export default app;
