@@ -6,7 +6,7 @@ const botToken = process.env.BOT_TOKEN;
 const targetGroupId = parseInt(process.env.GROUP_ID);
 
 
-
+app.get("/", async (req, res) => { res.json({ message: "Telegram bot is running!" }); });
 app.post("/webhook", async (req, res) => {
   try {
     const update = req.body;
